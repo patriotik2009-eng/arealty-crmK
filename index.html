@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Realty Group - CRM</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        
+        .login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #2d5a3d 0%, #3d7a4d 100%);
+            display: flex; align-items: center; justify-content: center; z-index: 9999;
+        }
+        .login-box {
+            background: white; padding: 40px; border-radius: 12px;
+            width: 90%; max-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .login-logo { text-align: center; font-size: 32px; font-weight: bold; color: #2d5a3d; margin-bottom: 30px; }
+        .login-logo span { color: #3d7a4d; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #666; font-weight: 500; }
+        .form-group input { width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; }
+        .form-group input:focus { outline: none; border-color: #3d7a4d; }
+        .login-btn { width: 100%; background: #3d7a4d; color: white; padding: 16px; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        .login-btn:hover { background: #2d5a3d; }
+        .error-msg { color: #e74c3c; text-align: center; margin-top: 15px; display: none; }
+        
+        .header { background: linear-gradient(135deg, #2d5a3d 0%, #3d7a4d 100%); color: white; padding: 15px 0; position: sticky; top: 0; z-index: 100; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 20px; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 24px; font-weight: bold; }
+        .logo span { color: #90ee90; }
+        .user-info { display: flex; align-items: center; gap: 20px; }
+        .logout-btn { background: rgba(255,255,255,0.2); color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; }
+        
+        .tabs { background: white; padding: 15px 0; border-bottom: 1px solid #e0e0e0; display: flex; gap: 10px; }
+        .tab-btn { padding: 10px 20px; border: none; background: #f5f5f5; border-radius: 6px; cursor: pointer; font-weight: 500; }
+        .tab-btn.active { background: #3d7a4d; color: white; }
+        
+        .filters { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .filter-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: end; }
+        .filter-group { flex: 1; min-width: 150px; }
+        .filter-group label { display: block; margin-bottom: 5px; color: #666; font-size: 13px; }
+        .filter-group select, .filter-group input { width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 14px; }
+        .search-btn { background: #3d7a4d; color: white; padding: 10px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        
+        .objects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .object-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+        .object-image { width: 100%; height: 200px; background: #e8f5e9; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        .object-image img { width: 100%; height: 100%; object-fit: cover; }
+        .object-badge { position: absolute; top: 10px; left: 10px; background: #3d7a4d; color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .object-content { padding: 20px; }
+        .object-price { font-size: 22px; font-weight: bold; color: #2d5a3d; margin-bottom: 5px; }
+        .object-id { color: #999; font-size: 14px; margin-bottom: 10px; }
+        .object-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+        .object-status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-bottom: 12px; }
+        .status-free { background: #d4edda; color: #155724; }
+        .status-work { background: #fff3cd; color: #856404; }
+        .status-meeting { background: #cce5ff; color: #004085; }
+        .status-contract { background: #e2d4f0; color: #4a148c; }
+        .status-sold { background: #d1ecf1; color: #0c5460; }
+        .object-details { display: flex; gap: 15px; margin-bottom: 15px; font-size: 13px; color: #666; }
+        .object-agent { font-size: 13px; color: #666; padding: 8px 0; border-top: 1px solid #eee; margin-bottom: 10px; }
+        .object-actions { display: flex; gap: 10px; }
+        .btn { flex: 1; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; text-align: center; text-decoration: none; }
+        .btn-primary { background: #3d7a4d; color: white; }
+        .btn-call { background: #ff6b6b; color: white; }
+        .btn-take { background: #28a745; color: white; }
+        
+        .hidden { display: none !important; }
+        .stats-bar { background: white; padding: 15px 20px; margin-bottom: 20px; border-radius: 8px; display: flex; gap: 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .stat-item { text-align: center; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #3d7a4d; }
+        .stat-label { font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <!-- Экран входа -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-box">
+            <div class="login-logo">A <span>Realty</span> Group</div>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>ID сотрудника</label>
+                    <input type="text" id="loginId" placeholder="Например: 5969819" required>
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" id="loginPassword" placeholder="Введите пароль" required>
+                </div>
+                <button type="submit" class="login-btn">Войти</button>
+                <div class="error-msg" id="loginError">Неверный ID или пароль</div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Основной интерфейс -->
+    <div id="mainApp" class="hidden">
+        <header class="header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo">A <span>Realty</span> Group</div>
+                    <div class="user-info">
+                        <span class="user-name" id="userName">Агент</span>
+                        <button class="logout-btn" onclick="logout()">Выйти</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="container">
+            <div class="tabs" id="tabsContainer">
+                <button class="tab-btn active" onclick="switchTab('my', this)">Мои объекты</button>
+                <button class="tab-btn" onclick="switchTab('free', this)">Свободные</button>
+                <button class="tab-btn admin-only hidden" onclick="switchTab('all', this)">Все объекты</button>
+            </div>
+
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-value" id="statMy">0</div>
+                    <div class="stat-label">Мои</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statFree">0</div>
+                    <div class="stat-label">Свободные</div>
+                </div>
+                <div class="stat-item admin-only hidden">
+                    <div class="stat-value" id="statAll">0</div>
+                    <div class="stat-label">Всего</div>
+                </div>
+            </div>
+
+            <div class="filters">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label>Микрорайон</label>
+                        <select id="filterMicro" onchange="applyFilters()">
+                            <option value="all">Все</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Комнаты</label>
+                        <select id="filterRooms" onchange="applyFilters()">
+                            <option value="all">Все</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Статус</label>
+                        <select id="filterStatus" onchange="applyFilters()">
+                            <option value="all">Все статусы</option>
+                            <option value="Свободен">Свободен</option>
+                            <option value="В работе">В работе</option>
+                            <option value="Встреча назначена">Встреча назначена</option>
+                            <option value="Договор">Договор</option>
+                            <option value="Продан">Продан</option>
+                        </select>
+                    </div>
+                    <div class="filter-group admin-only hidden">
+                        <label>Агент</label>
+                        <select id="filterAgent" onchange="applyFilters()">
+                            <option value="all">Все агенты</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Цена от</label>
+                        <input type="number" id="priceFrom" placeholder="0" onchange="applyFilters()">
+                    </div>
+                    <div class="filter-group">
+                        <label>Цена до</label>
+                        <input type="number" id="priceTo" placeholder="100000000" onchange="applyFilters()">
+                    </div>
+                </div>
+            </div>
+
+            <div id="objectsContainer" class="objects-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== КОНФИГУРАЦИЯ ====================
+        
+        // Webhook Битрикс24 (ВАШ URL)
+        const BITRIX_WEBHOOK = 'https://b24-6mcve5.bitrix24.kz/rest/1/n3pkhvt1s1y11ny7/';
+        
+        // Пользователи системы
+        const users = {
+            '5969819': { name: 'Жанат Тампиева', role: 'admin', password: 'x7k9m2', tempPassword: true },
+            '127611': { name: 'Асель Пірназарова', role: 'admin', password: 'p4n8q1', tempPassword: true },
+            '18616153': { name: 'Нурлан Кадиров', role: 'admin', password: 'w2r5t8', tempPassword: true }
+        };
+
+        // ==================== СОСТОЯНИЕ ====================
+        
+        let currentUser = null;
+        let currentTab = 'my';
+        let objects = [];
+
+        // ==================== АВТОРИЗАЦИЯ ====================
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const id = document.getElementById('loginId').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (users[id] && users[id].password === password) {
+                currentUser = { id, ...users[id] };
+                startApp();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+
+        function startApp() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('userName').textContent = currentUser.name;
+            
+            if (currentUser.role === 'admin') {
+                document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+            }
+            
+            loadData();
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('loginId').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginError').style.display = 'none';
+        }
+
+        // ==================== ЗАГРУЗКА ДАННЫХ ====================
+
+        async function loadData() {
+            try {
+                await loadBitrixDeals();
+                updateFilterOptions();
+                applyFilters();
+            } catch (error) {
+                console.error('Ошибка загрузки:', error);
+                loadDemoData();
+            }
+        }
+
+        async function loadBitrixDeals() {
+            // Получаем сделки из воронки
+            const response = await fetch(`${BITRIX_WEBHOOK}crm.deal.list?filter[STAGE_ID]=NEW&select[]=*&select[]=UF_*`);
+            const data = await response.json();
+            const deals = data.result || [];
+            
+            objects = deals.map(deal => ({
+                id: deal.ID,
+                title: deal.TITLE,
+                price: parseInt(deal.OPPORTUNITY) || 0,
+                status: deal.STAGE_NAME || 'Свободен',
+                agent: deal.ASSIGNED_BY_ID,
+                agentName: deal.ASSIGNED_BY_NAME || 'Не назначен',
+                micro: deal.UF_CRM_5D5E3E1E3E1E5 || 'Не указан',
+                rooms: deal.UF_CRM_5D5E3E1E3E1E6 || 0,
+                area: deal.UF_CRM_5D5E3E1E3E1E7 || 0,
+                floor: deal.UF_CRM_5D5E3E1E3E1E8 || 0,
+                krishaId: deal.UF_CRM_5D5E3E1E3E1E9 || '',
+                bitrixUrl: `https://b24-6mcve5.bitrix24.kz/crm/deal/details/${deal.ID}/`
+            }));
+        }
+
+        function loadDemoData() {
+            // Демо-данные если API недоступен
+            objects = [
+                {id: 'AL01', title: 'AL01 | Ғажайып', price: 25500000, rooms: 1, area: 34.34, floor: 6, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Ғажайып', krishaId: '1008190616', bitrixUrl: 'https://b24-6mcve5.bitrix24.kz/crm/deal/details/AL01/'},
+                {id: 'AL02', title: 'AL02 | Акбулак', price: 28000000, rooms: 2, area: 45, floor: 5, agent: null, agentName: 'Не назначен', status: 'Свободен', micro: 'Акбулак', krishaId: '1008190617', bitrixUrl: 'https://b24-6mcve5.bitrix24.kz/crm/deal/details/AL02/'},
+                {id: 'AL03', title: 'AL03 | Саялы', price: 24000000, rooms: 1, area: 30, floor: 5, agent: '127611', agentName: 'Асель Пірназарова', status: 'В работе', micro: 'Саялы', krishaId: '1008190618', bitrixUrl: 'https://b24-6mcve5.bitrix24.kz/crm/deal/details/AL03/'}
+            ];
+            updateFilterOptions();
+            applyFilters();
+        }
+
+        // ==================== ФИЛЬТРЫ И ОТОБРАЖЕНИЕ ====================
+
+        function updateFilterOptions() {
+            const micros = [...new Set(objects.map(o => o.micro))].filter(m => m && m !== 'Не указан');
+            const microSelect = document.getElementById('filterMicro');
+            micros.forEach(m => {
+                microSelect.innerHTML += `<option value="${m}">${m}</option>`;
+            });
+
+            if (currentUser.role === 'admin') {
+                const agentSelect = document.getElementById('filterAgent');
+                Object.entries(users).forEach(([id, user]) => {
+                    agentSelect.innerHTML += `<option value="${id}">${user.name}</option>`;
+                });
+            }
+        }
+
+        function switchTab(tab, btn) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const micro = document.getElementById('filterMicro').value;
+            const rooms = document.getElementById('filterRooms').value;
+            const status = document.getElementById('filterStatus').value;
+            const agent = document.getElementById('filterAgent')?.value || 'all';
+            const priceFrom = document.getElementById('priceFrom').value;
+            const priceTo = document.getElementById('priceTo').value;
+            
+            let filtered = objects;
+            
+            if (currentTab === 'my') {
+                filtered = filtered.filter(o => o.agent === currentUser.id);
+            } else if (currentTab === 'free') {
+                filtered = filtered.filter(o => !o.agent || o.status === 'Свободен');
+            }
+            
+            if (micro !== 'all') filtered = filtered.filter(o => o.micro === micro);
+            if (rooms !== 'all') filtered = filtered.filter(o => o.rooms == rooms);
+            if (status !== 'all') filtered = filtered.filter(o => o.status === status);
+            if (agent !== 'all' && currentUser.role === 'admin') filtered = filtered.filter(o => o.agent === agent);
+            if (priceFrom) filtered = filtered.filter(o => o.price >= priceFrom);
+            if (priceTo) filtered = filtered.filter(o => o.price <= priceTo);
+            
+            renderObjects(filtered);
+            updateStats();
+        }
+
+        function getStatusClass(status) {
+            const classes = {
+                'Свободен': 'status-free',
+                'В работе': 'status-work',
+                'Встреча назначена': 'status-meeting',
+                'Договор': 'status-contract',
+                'Продан': 'status-sold'
+            };
+            return classes[status] || 'status-work';
+        }
+
+        function getKrishaPhotoUrl(krishaId) {
+            if (!krishaId) return 'https://via.placeholder.com/400x200/e8f5e9/3d7a4d?text=Нет+фото';
+            return `https://static.krisha.kz/photos/${krishaId.slice(0, 2)}/${krishaId.slice(2, 4)}/${krishaId}_1.jpg`;
+        }
+
+        function renderObjects(data) {
+            const container = document.getElementById('objectsContainer');
+            container.innerHTML = '';
+            
+            if (data.length === 0) {
+                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">Нет объектов</div>';
+                return;
+            }
+            
+            data.forEach(obj => {
+                const isFree = !obj.agent || obj.status === 'Свободен';
+                const isMine = obj.agent === currentUser.id;
+                const canTake = isFree && currentUser.role !== 'admin';
+                const showCall = isMine || currentUser.role === 'admin';
+                
+                const photoUrl = getKrishaPhotoUrl(obj.krishaId);
+                
+                const card = document.createElement('div');
+                card.className = 'object-card';
+                card.innerHTML = `
+                    <div class="object-image">
+                        <img src="${photoUrl}" alt="${obj.id}" onerror="this.src='https://via.placeholder.com/400x200/e8f5e9/3d7a4d?text=Нет+фото'">
+                        <span class="object-badge">${obj.rooms}-комн.</span>
+                    </div>
+                    <div class="object-content">
+                        <div class="object-price">${obj.price.toLocaleString()} ₸</div>
+                        <div class="object-id">ID: ${obj.id}</div>
+                        <div class="object-title">${obj.micro}</div>
+                        <span class="object-status ${getStatusClass(obj.status)}">${obj.status}</span>
+                        <div class="object-details">
+                            <div>🏠 ${obj.rooms} комн.</div>
+                            <div>📐 ${obj.area} м²</div>
+                            <div>🏢 ${obj.floor} этаж</div>
+                        </div>
+                        <div class="object-agent">👤 ${obj.agentName || 'Не назначен'}</div>
+                        <div class="object-actions">
+                            <a href="${obj.bitrixUrl}" target="_blank" class="btn btn-primary">Открыть в Битрикс24</a>
+                            ${canTake ? `<button class="btn btn-take" onclick="takeObject('${obj.id}')">Взять в работу</button>` : ''}
+                            ${showCall && !canTake ? `<button class="btn btn-call" onclick="callSeller('${obj.id}')">📞 Позвонить</button>` : ''}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function updateStats() {
+            const myCount = objects.filter(o => o.agent === currentUser.id).length;
+            const freeCount = objects.filter(o => !o.agent || o.status === 'Свободен').length;
+            
+            document.getElementById('statMy').textContent = myCount;
+            document.getElementById('statFree').textContent = freeCount;
+            if (document.getElementById('statAll')) {
+                document.getElementById('statAll').textContent = objects.length;
+            }
+        }
+
+        async function takeObject(objectId) {
+            if (!confirm('Взять объект в работу?')) return;
+            
+            try {
+                const response = await fetch(`${BITRIX_WEBHOOK}crm.deal.update?id=${objectId}&fields[ASSIGNED_BY_ID]=${currentUser.id}&fields[STAGE_ID]=NEW`);
+                
+                const obj = objects.find(o => o.id === objectId);
+                if (obj) {
+                    obj.agent = currentUser.id;
+                    obj.agentName = currentUser.name;
+                    obj.status = 'В работе';
+                }
+                
+                applyFilters();
+                alert('Объект взят в работу!');
+                
+            } catch (error) {
+                alert('Ошибка. Попробуйте позже.');
+            }
+        }
+
+        function callSeller(objectId) {
+            alert(`Звонок по объекту ${objectId}\n\nЗавтра подключим Mango.`);
+        }
+    </script>
+</body>
+</html>
