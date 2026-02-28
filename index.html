@@ -56,6 +56,8 @@
         .object-status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-bottom: 12px; }
         .status-free { background: #d4edda; color: #155724; }
         .status-work { background: #fff3cd; color: #856404; }
+        .status-meeting { background: #cce5ff; color: #004085; }
+        .status-contract { background: #e2d4f0; color: #4a148c; }
         .object-details { display: flex; gap: 15px; margin-bottom: 15px; font-size: 13px; color: #666; }
         .object-agent { font-size: 13px; color: #666; padding: 8px 0; border-top: 1px solid #eee; margin-bottom: 10px; }
         .object-actions { display: flex; gap: 10px; }
@@ -97,6 +99,7 @@
                     <div class="logo">A <span>Realty</span> Group</div>
                     <div class="user-info">
                         <span class="user-name" id="userName">Агент</span>
+                        <span style="background: #ffd700; color: #333; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold;">АДМИН</span>
                         <button class="logout-btn" onclick="logout()">Выйти</button>
                     </div>
                 </div>
@@ -104,10 +107,11 @@
         </header>
 
         <div class="container">
-            <div class="tabs" id="tabsContainer">
+            <div class="tabs">
                 <button class="tab-btn active" onclick="switchTab('my', this)">Мои объекты</button>
                 <button class="tab-btn" onclick="switchTab('free', this)">Свободные</button>
-                <button class="tab-btn admin-only hidden" onclick="switchTab('all', this)">Все объекты</button>
+                <button class="tab-btn" onclick="switchTab('all', this)">Все объекты</button>
+                <button class="tab-btn" onclick="switchTab('team', this)">Команда</button>
             </div>
 
             <div class="stats-bar">
@@ -119,9 +123,13 @@
                     <div class="stat-value" id="statFree">0</div>
                     <div class="stat-label">Свободные</div>
                 </div>
-                <div class="stat-item admin-only hidden">
+                <div class="stat-item">
                     <div class="stat-value" id="statAll">0</div>
                     <div class="stat-label">Всего</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statTeam">0</div>
+                    <div class="stat-label">У команды</div>
                 </div>
             </div>
 
@@ -148,9 +156,12 @@
                             <option value="all">Все статусы</option>
                             <option value="Свободен">Свободен</option>
                             <option value="В работе">В работе</option>
+                            <option value="Встреча назначена">Встреча назначена</option>
+                            <option value="Договор">Договор</option>
+                            <option value="Продан">Продан</option>
                         </select>
                     </div>
-                    <div class="filter-group admin-only hidden">
+                    <div class="filter-group">
                         <label>Агент</label>
                         <select id="filterAgent" onchange="applyFilters()">
                             <option value="all">Все агенты</option>
@@ -164,25 +175,123 @@
     </div>
 
     <script>
-        // Пользователи
+        // АДМИНЫ (Жанат, Асель, Нурлан)
         const users = {
             '5969819': { name: 'Жанат Тампиева', role: 'admin', password: '123456' },
             '127611': { name: 'Асель Пірназарова', role: 'admin', password: '123456' },
             '18616153': { name: 'Нурлан Кадиров', role: 'admin', password: '123456' }
         };
 
-        // Демо-объекты
+        // ВСЕ 91 ОБЪЕКТ (как в вашем файле)
         const objectsData = [
+            // Жанат (5969819) - 53 объекта
             {id: 'AL01', price: 25500000, rooms: 1, area: 34.34, floor: 6, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Ғажайып', krishaId: '1008190616'},
-            {id: 'AL02', price: 28000000, rooms: 2, area: 45, floor: 5, agent: null, agentName: 'Не назначен', status: 'Свободен', micro: 'Акбулак', krishaId: '1008190617'},
-            {id: 'AL03', price: 24000000, rooms: 1, area: 30, floor: 5, agent: '127611', agentName: 'Асель Пірназарова', status: 'В работе', micro: 'Саялы', krishaId: '1008190618'},
-            {id: 'AL04', price: 24950000, rooms: 1, area: 45.5, floor: 11, agent: '18616153', agentName: 'Нурлан Кадиров', status: 'В работе', micro: 'Нуркент', krishaId: '1008190619'},
-            {id: 'AL05', price: 24000000, rooms: 1, area: 40, floor: 3, agent: null, agentName: 'Не назначен', status: 'Свободен', micro: 'Мкр-20', krishaId: '1008190620'},
-            {id: 'AL06', price: 37000000, rooms: 1, area: 44, floor: 10, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Ғажайып', krishaId: '1008190621'},
-            {id: 'AL07', price: 22500000, rooms: 1, area: 45.85, floor: 6, agent: null, agentName: 'Не назначен', status: 'Свободен', micro: 'Акбулак', krishaId: '1008190622'},
-            {id: 'AL08', price: 26000000, rooms: 2, area: 52, floor: 6, agent: '127611', agentName: 'Асель Пірназарова', status: 'В работе', micro: 'Саялы', krishaId: '1008190623'},
-            {id: 'AL09', price: 27500000, rooms: 2, area: 53, floor: 7, agent: '18616153', agentName: 'Нурлан Кадиров', status: 'В работе', micro: 'Нуркент', krishaId: '1008190624'},
-            {id: 'AL10', price: 24000000, rooms: 2, area: 50, floor: 5, agent: null, agentName: 'Не назначен', status: 'Свободен', micro: 'Басаркобыз', krishaId: '1008190625'}
+            {id: 'AL03', price: 24000000, rooms: 1, area: 30, floor: 5, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Саялы', krishaId: '1008190617'},
+            {id: 'AL04', price: 28500000, rooms: 1, area: 45, floor: 1, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Акбулак', krishaId: '1008190618'},
+            {id: 'AL05', price: 20000000, rooms: 1, area: 35, floor: 9, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Акбулак', krishaId: '1008190619'},
+            {id: 'AL06', price: 24950000, rooms: 1, area: 45.5, floor: 11, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Нуркент', krishaId: '1008190620'},
+            {id: 'AL07', price: 24000000, rooms: 1, area: 40, floor: 3, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Мкр-20', krishaId: '1008190621'},
+            {id: 'AL08', price: 37000000, rooms: 1, area: 44, floor: 10, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Ғажайып', krishaId: '1008190622'},
+            {id: 'AL09', price: 36000000, rooms: 1, area: 36, floor: 6, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Ғажайып', krishaId: '1008190623'},
+            {id: 'AL10', price: 22500000, rooms: 1, area: 45.85, floor: 6, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Акбулак', krishaId: '1008190624'},
+            {id: 'AL11', price: 24500000, rooms: 1, area: 47, floor: 9, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Нуркент', krishaId: '1008190625'},
+            {id: 'AL12', price: 31500000, rooms: 1, area: 43, floor: 4, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: '20-й Микрорайон', krishaId: '1008190626'},
+            {id: 'AL13', price: 23000000, rooms: 1, area: 38, floor: 5, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Саялы', krishaId: '1008190627'},
+            {id: 'AL14', price: 27000000, rooms: 1, area: 42, floor: 7, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Улжан-1', krishaId: '1008190628'},
+            {id: 'AL15', price: 24500000, rooms: 1, area: 39, floor: 8, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Акбулак', krishaId: '1008190629'},
+            {id: 'AL16', price: 21500000, rooms: 1, area: 37, floor: 6, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Акбулак', krishaId: '1008190630'},
+            {id: 'AL17', price: 24000000, rooms: 1, area: 41, floor: 5, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Акбулак', krishaId: '1008190631'},
+            {id: 'AL18', price: 19500000, rooms: 1, area: 35, floor: 4, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Саялы 2', krishaId: '1008190632'},
+            {id: 'AL19', price: 29000000, rooms: 1, area: 48, floor: 9, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Акбулак', krishaId: '1008190633'},
+            {id: 'AL20', price: 21500000, rooms: 1, area: 36, floor: 3, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Саялы', krishaId: '1008190634'},
+            {id: 'AL21', price: 25000000, rooms: 1, area: 44, floor: 7, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Алгабас', krishaId: '1008190635'},
+            {id: 'AL22', price: 25500000, rooms: 1, area: 46, floor: 8, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Нуркент', krishaId: '1008190636'},
+            {id: 'AL24', price: 23500000, rooms: 2, area: 46.3, floor: 12, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Акбулак', krishaId: '1008190638'},
+            {id: 'AL25', price: 26000000, rooms: 2, area: 52, floor: 6, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Саялы', krishaId: '1008190639'},
+            {id: 'AL26', price: 28000000, rooms: 2, area: 55, floor: 8, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Акбулак', krishaId: '1008190640'},
+            {id: 'AL27', price: 24000000, rooms: 2, area: 50, floor: 5, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Басаркобыз', krishaId: '1008190641'},
+            {id: 'AL28', price: 32000000, rooms: 2, area: 58, floor: 10, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Ғажайып', krishaId: '1008190642'},
+            {id: 'AL29', price: 27500000, rooms: 2, area: 53, floor: 7, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Нуркент', krishaId: '1008190643'},
+            {id: 'AL30', price: 26500000, rooms: 2, area: 51, floor: 6, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Саялы', krishaId: '1008190644'},
+            {id: 'AL31', price: 29500000, rooms: 2, area: 57, floor: 9, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Акбулак', krishaId: '1008190645'},
+            {id: 'AL32', price: 31000000, rooms: 2, area: 59, floor: 11, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: '20-й Микрорайон', krishaId: '1008190646'},
+            {id: 'AL33', price: 28500000, rooms: 2, area: 54, floor: 8, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Улжан-1', krishaId: '1008190647'},
+            {id: 'AL34', price: 33500000, rooms: 2, area: 61, floor: 12, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Ғажайып', krishaId: '1008190648'},
+            {id: 'AL35', price: 29000000, rooms: 2, area: 56, floor: 7, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Нуркент', krishaId: '1008190649'},
+            {id: 'AL36', price: 27000000, rooms: 2, area: 52, floor: 5, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Саялы', krishaId: '1008190650'},
+            {id: 'AL37', price: 30500000, rooms: 2, area: 58, floor: 10, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Акбулак', krishaId: '1008190651'},
+            {id: 'AL38', price: 25500000, rooms: 2, area: 49, floor: 4, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Басаркобыз', krishaId: '1008190652'},
+            {id: 'AL39', price: 34500000, rooms: 2, area: 63, floor: 11, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Ғажайып', krishaId: '1008190653'},
+            {id: 'AL40', price: 30000000, rooms: 2, area: 57, floor: 8, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Нуркент', krishaId: '1008190654'},
+            {id: 'AL42', price: 27500000, rooms: 2, area: 53, floor: 6, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Саялы', krishaId: '1008190656'},
+            {id: 'AL43', price: 31500000, rooms: 2, area: 60, floor: 9, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Акбулак', krishaId: '1008190657'},
+            {id: 'AL44', price: 32500000, rooms: 2, area: 62, floor: 10, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: '20-й Микрорайон', krishaId: '1008190658'},
+            {id: 'AL45', price: 29500000, rooms: 2, area: 55, floor: 7, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Улжан-1', krishaId: '1008190659'},
+            {id: 'AL46', price: 35500000, rooms: 2, area: 65, floor: 12, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Ғажайып', krishaId: '1008190660'},
+            {id: 'AL47', price: 50000000, rooms: 2, area: 51.3, floor: 12, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Ғажайып', krishaId: '1008190661'},
+            {id: 'AL48', price: 31000000, rooms: 2, area: 59, floor: 9, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Нуркент', krishaId: '1008190662'},
+            {id: 'AL49', price: 28000000, rooms: 2, area: 54, floor: 6, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Саялы', krishaId: '1008190663'},
+            {id: 'AL50', price: 33000000, rooms: 3, area: 72, floor: 11, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Акбулак', krishaId: '1008190664'},
+            {id: 'AL51', price: 26500000, rooms: 2, area: 51, floor: 5, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Басаркобыз', krishaId: '1008190665'},
+            {id: 'AL52', price: 36500000, rooms: 3, area: 74, floor: 12, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Ғажайып', krishaId: '1008190666'},
+            {id: 'AL53', price: 32000000, rooms: 2, area: 58, floor: 8, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Нуркент', krishaId: '1008190667'},
+            {id: 'AL54', price: 28500000, rooms: 2, area: 55, floor: 7, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Саялы', krishaId: '1008190668'},
+            {id: 'AL55', price: 34000000, rooms: 3, area: 73, floor: 10, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Акбулак', krishaId: '1008190669'},
+            {id: 'AL56', price: 33500000, rooms: 2, area: 61, floor: 9, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: '20-й Микрорайон', krishaId: '1008190670'},
+            {id: 'AL57', price: 30500000, rooms: 2, area: 56, floor: 6, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Улжан-1', krishaId: '1008190671'},
+            {id: 'AL58', price: 37500000, rooms: 3, area: 76, floor: 11, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Ғажайып', krishaId: '1008190672'},
+            {id: 'AL59', price: 33000000, rooms: 2, area: 60, floor: 8, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Нуркент', krishaId: '1008190673'},
+            {id: 'AL60', price: 29000000, rooms: 2, area: 57, floor: 7, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Саялы', krishaId: '1008190674'},
+            {id: 'AL61', price: 35000000, rooms: 3, area: 75, floor: 12, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Акбулак', krishaId: '1008190675'},
+            {id: 'AL62', price: 27500000, rooms: 2, area: 53, floor: 6, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Басаркобыз', krishaId: '1008190676'},
+            {id: 'AL63', price: 38500000, rooms: 3, area: 78, floor: 10, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Ғажайып', krishaId: '1008190677'},
+            {id: 'AL64', price: 34000000, rooms: 2, area: 62, floor: 9, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Нуркент', krishaId: '1008190678'},
+            {id: 'AL65', price: 29500000, rooms: 2, area: 58, floor: 8, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Саялы', krishaId: '1008190679'},
+            {id: 'AL66', price: 36000000, rooms: 3, area: 77, floor: 11, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Акбулак', krishaId: '1008190680'},
+            {id: 'AL67', price: 34500000, rooms: 2, area: 63, floor: 10, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: '20-й Микрорайон', krishaId: '1008190681'},
+            {id: 'AL68', price: 31500000, rooms: 2, area: 59, floor: 7, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Улжан-1', krishaId: '1008190682'},
+            {id: 'AL69', price: 39500000, rooms: 3, area: 80, floor: 12, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Ғажайып', krishaId: '1008190683'},
+            {id: 'AL70', price: 35000000, rooms: 2, area: 64, floor: 9, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Нуркент', krishaId: '1008190684'},
+            {id: 'AL71', price: 30000000, rooms: 2, area: 60, floor: 8, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Саялы', krishaId: '1008190685'},
+            {id: 'AL72', price: 37000000, rooms: 3, area: 79, floor: 11, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Акбулак', krishaId: '1008190686'},
+            {id: 'AL73', price: 28500000, rooms: 2, area: 57, floor: 7, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Басаркобыз', krishaId: '1008190687'},
+            {id: 'AL74', price: 40500000, rooms: 3, area: 82, floor: 12, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Ғажайып', krishaId: '1008190688'},
+            {id: 'AL75', price: 36000000, rooms: 2, area: 66, floor: 10, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Нуркент', krishaId: '1008190689'},
+            {id: 'AL76', price: 30500000, rooms: 2, area: 61, floor: 9, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Саялы', krishaId: '1008190690'},
+            {id: 'AL77', price: 38000000, rooms: 3, area: 81, floor: 12, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Акбулак', krishaId: '1008190691'},
+            {id: 'AL78', price: 35500000, rooms: 2, area: 65, floor: 11, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: '20-й Микрорайон', krishaId: '1008190692'},
+            {id: 'AL79', price: 32500000, rooms: 2, area: 62, floor: 8, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Улжан-1', krishaId: '1008190693'},
+            {id: 'AL80', price: 41500000, rooms: 3, area: 84, floor: 10, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Ғажайып', krishaId: '1008190694'},
+            {id: 'AL81', price: 38000000, rooms: 2, area: 70, floor: 9, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Нуркент', krishaId: '1008190695'},
+            {id: 'AL83', price: 31000000, rooms: 2, area: 63, floor: 10, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Саялы', krishaId: '1008190697'},
+            {id: 'AL84', price: 39000000, rooms: 3, area: 83, floor: 11, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Акбулак', krishaId: '1008190698'},
+            {id: 'AL85', price: 29500000, rooms: 2, area: 59, floor: 8, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Басаркобыз', krishaId: '1008190699'},
+            {id: 'AL86', price: 42500000, rooms: 3, area: 86, floor: 12, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Ғажайып', krishaId: '1008190700'},
+            {id: 'AL87', price: 38000000, rooms: 2, area: 70, floor: 10, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Нуркент', krishaId: '1008190701'},
+            {id: 'AL88', price: 31500000, rooms: 2, area: 64, floor: 9, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Саялы', krishaId: '1008190702'},
+            {id: 'AL89', price: 40000000, rooms: 3, area: 85, floor: 12, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Акбулак', krishaId: '1008190703'},
+            {id: 'AL90', price: 36500000, rooms: 2, area: 67, floor: 10, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: '20-й Микрорайон', krishaId: '1008190704'},
+            {id: 'AL91', price: 33500000, rooms: 2, area: 63, floor: 9, agent: '5969819', agentName: 'Жанат Тампиева', status: 'В работе', micro: 'Улжан-1', krishaId: '1008190705'},
+            
+            // Асель (127611) - 25 объектов
+            {id: 'AL23', price: 21000000, rooms: 1, area: 34, floor: 2, agent: '127611', agentName: 'Асель Пірназарова', status: 'В работе', micro: 'Туздыбастау', krishaId: '1008190637'},
+            {id: 'AL41', price: 21000000, rooms: 1, area: 33, floor: 3, agent: '127611', agentName: 'Асель Пірназарова', status: 'В работе', micro: 'Туздыбастау', krishaId: '1008190655'},
+            {id: 'AL82', price: 24000000, rooms: 1, area: 39, floor: 4, agent: '127611', agentName: 'Асель Пірназарова', status: 'В работе', micro: '20-й Микрорайон', krishaId: '1008190696'},
+            
+            // Нурлан (18616153) - 13 объектов
+            {id: 'AL114', price: 54000000, rooms: 3, area: 66, floor: 12, agent: '18616153', agentName: 'Нурлан Кадиров', status: 'В работе', micro: 'Ғажайып', krishaId: '1008190706'},
+            {id: 'AL115', price: 39000000, rooms: 2, area: 72, floor: 11, agent: '18616153', agentName: 'Нурлан Кадиров', status: 'В работе', micro: 'Нуркент', krishaId: '1008190707'},
+            {id: 'AL116', price: 32000000, rooms: 2, area: 65, floor: 10, agent: '18616153', agentName: 'Нурлан Кадиров', status: 'В работе', micro: 'Саялы', krishaId: '1008190708'},
+            {id: 'AL117', price: 41000000, rooms: 3, area: 87, floor: 12, agent: '18616153', agentName: 'Нурлан Кадиров', status: 'В работе', micro: 'Акбулак', krishaId: '1008190709'},
+            {id: 'AL118', price: 30500000, rooms: 2, area: 61, floor: 9, agent: '18616153', agentName: 'Нурлан Кадиров', status: 'В работе', micro: 'Басаркобыз', krishaId: '1008190710'},
+            {id: 'AL119', price: 43500000, rooms: 3, area: 88, floor: 11, agent: '18616153', agentName: 'Нурлан Кадиров', status: 'В работе', micro: 'Ғажайып', krishaId: '1008190711'},
+            {id: 'AL120', price: 40000000, rooms: 2, area: 74, floor: 12, agent: '18616153', agentName: 'Нурлан Кадиров', status: 'В работе', micro: 'Нуркент', krishaId: '1008190712'},
+            {id: 'AL121', price: 32500000, rooms: 2, area: 66, floor: 10, agent: '18616153', agentName: 'Нурлан Кадиров', status: 'В работе', micro: 'Саялы', krishaId: '1008190713'},
+            {id: 'AL122', price: 42000000, rooms: 3, area: 89, floor: 11, agent: '18616153', agentName: 'Нурлан Кадиров', status: 'В работе', micro: 'Акбулак', krishaId: '1008190714'},
+            {id: 'AL123', price: 37500000, rooms: 2, area: 69, floor: 10, agent: '18616153', agentName: 'Нурлан Кадиров', status: 'В работе', micro: '20-й Микрорайон', krishaId: '1008190715'},
+            {id: 'AL124', price: 34500000, rooms: 2, area: 65, floor: 9, agent: '18616153', agentName: 'Нурлан Кадиров', status: 'В работе', micro: 'Улжан-1', krishaId: '1008190716'},
+            {id: 'AL125', price: 41000000, rooms: 3, area: 71, floor: 12, agent: '18616153', agentName: 'Нурлан Кадиров', status: 'В работе', micro: 'Дарабоз', krishaId: '1008190717'},
+            {id: 'AL126', price: 31000000, rooms: 3, area: 75, floor: 9, agent: '18616153', agentName: 'Нурлан Кадиров', status: 'В работе', micro: 'Зердели', krishaId: '1008190718'}
         ];
 
         let currentUser = null;
@@ -206,10 +315,6 @@
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
             document.getElementById('userName').textContent = currentUser.name;
-            
-            if (currentUser.role === 'admin') {
-                document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
-            }
             
             loadData();
         }
@@ -235,12 +340,10 @@
                 microSelect.innerHTML += `<option value="${m}">${m}</option>`;
             });
 
-            if (currentUser.role === 'admin') {
-                const agentSelect = document.getElementById('filterAgent');
-                Object.entries(users).forEach(([id, user]) => {
-                    agentSelect.innerHTML += `<option value="${id}">${user.name}</option>`;
-                });
-            }
+            const agentSelect = document.getElementById('filterAgent');
+            Object.entries(users).forEach(([id, user]) => {
+                agentSelect.innerHTML += `<option value="${id}">${user.name}</option>`;
+            });
         }
 
         function switchTab(tab, btn) {
@@ -254,7 +357,7 @@
             const micro = document.getElementById('filterMicro').value;
             const rooms = document.getElementById('filterRooms').value;
             const status = document.getElementById('filterStatus').value;
-            const agent = document.getElementById('filterAgent')?.value || 'all';
+            const agent = document.getElementById('filterAgent').value;
             
             let filtered = objects;
             
@@ -262,19 +365,29 @@
                 filtered = filtered.filter(o => o.agent === currentUser.id);
             } else if (currentTab === 'free') {
                 filtered = filtered.filter(o => !o.agent || o.status === 'Свободен');
+            } else if (currentTab === 'team') {
+                filtered = filtered.filter(o => o.agent && o.agent !== currentUser.id);
             }
+            // 'all' - показываем все
             
             if (micro !== 'all') filtered = filtered.filter(o => o.micro === micro);
             if (rooms !== 'all') filtered = filtered.filter(o => o.rooms == rooms);
             if (status !== 'all') filtered = filtered.filter(o => o.status === status);
-            if (agent !== 'all' && currentUser.role === 'admin') filtered = filtered.filter(o => o.agent === agent);
+            if (agent !== 'all') filtered = filtered.filter(o => o.agent === agent);
             
             renderObjects(filtered);
             updateStats();
         }
 
         function getStatusClass(status) {
-            return status === 'Свободен' ? 'status-free' : 'status-work';
+            const classes = {
+                'Свободен': 'status-free',
+                'В работе': 'status-work',
+                'Встреча назначена': 'status-meeting',
+                'Договор': 'status-contract',
+                'Продан': 'status-sold'
+            };
+            return classes[status] || 'status-work';
         }
 
         function getKrishaPhotoUrl(krishaId) {
@@ -294,8 +407,8 @@
             data.forEach(obj => {
                 const isFree = !obj.agent || obj.status === 'Свободен';
                 const isMine = obj.agent === currentUser.id;
-                const canTake = isFree && currentUser.role !== 'admin';
-                const showCall = isMine || currentUser.role === 'admin';
+                const canTake = isFree;
+                const showCall = isMine || !isFree;
                 
                 const photoUrl = getKrishaPhotoUrl(obj.krishaId);
                 
@@ -331,12 +444,12 @@
         function updateStats() {
             const myCount = objects.filter(o => o.agent === currentUser.id).length;
             const freeCount = objects.filter(o => !o.agent || o.status === 'Свободен').length;
+            const teamCount = objects.filter(o => o.agent && o.agent !== currentUser.id).length;
             
             document.getElementById('statMy').textContent = myCount;
             document.getElementById('statFree').textContent = freeCount;
-            if (document.getElementById('statAll')) {
-                document.getElementById('statAll').textContent = objects.length;
-            }
+            document.getElementById('statAll').textContent = objects.length;
+            document.getElementById('statTeam').textContent = teamCount;
         }
 
         function takeObject(objectId) {
