@@ -238,16 +238,52 @@
 
         // ==================== ЗАГРУЗКА ДАННЫХ ====================
 
-        async function loadData() {
-            try {
-                await loadBitrixDeals();
-                updateFilterOptions();
-                applyFilters();
-            } catch (error) {
-                console.error('Ошибка загрузки:', error);
-                loadDemoData();
-            }
-        }
+ async function loadBitrixDeals() {
+    // Получаем все сделки из всех воронок
+    const response = await fetch(`${BITRIX_WEBHOOK}crm.deal.list?select[]=*&select[]=UF_CRM_*`);
+    const data = await response.json();
+    const deals = data.result || [];
+    
+    // Фильтруем только "Алатауский район" по названию
+    const alatauDeals = deals.filter(deal => 
+        deal.TITLE && deal.TITLE.includes('Алатау')
+    );
+    
+    console.log('Всего сделок:', deals.length);
+    console.log('Алатауский район:', alatauDeals.length);
+    
+    objects = alatauDeals.map(deal => ({
+        id: deal.ID,
+        title: deal.TITLE,
+        price: parseInt(deal.OPPORTUNITY) || 0,
+        status: deal.STAGE_NAME || 'Свободен',
+        agent: deal.ASSIGNED_BY_ID,
+        agentName: deal.ASSIGNED_BY_NAME || 'Не назначен',
+        micro: deal.UF_CRM_5D5E3E1E3E1E5 || 'Алатауский',
+        rooms: deal.UF_CRM_5D5E3E1E3E1E6 || 2,
+        area: deal.UF_CRM_5D5E3E1E3E1E7 || 45,
+        floor: deal.UF_CRM_5D5E3E1E3E1E8 || 5,
+        krishaId: deal.UF_CRM_5D5E3E1E3E1E9 || '',
+        bitrixUrl: `https://b24-6mcve5.bitrix24.kz/crm/deal/details/${deal.ID}/`
+    }));
+    
+    // Если ничего не найдено, показываем все
+    if (objects.length === 0) {
+        objects = deals.map(deal => ({
+            id: deal.ID,
+            title: deal.TITLE,
+            price: parseInt(deal.OPPORTUNITY) || 0,
+            status: deal.STAGE_NAME || 'Свободен',
+            agent: deal.ASSIGNED_BY_ID,
+            agentName: deal.ASSIGNED_BY_NAME || 'Не назначен',
+            micro: 'Алатауский',
+            rooms: 2,
+            area: 45,
+            floor: 5,
+            bitrixUrl: `https://b24-6mcve5.bitrix24.kz/crm/deal/details/${deal.ID}/`
+        }));
+    }
+}
 
         async function loadBitrixDeals() {
             // Получаем сделки из воронки
