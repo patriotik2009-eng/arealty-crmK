@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Realty Group - Недвижимость Алматы</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        /* Шапка */
+        .header {
+            background: linear-gradient(135deg, #2d5a3d 0%, #3d7a4d 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .logo span {
+            color: #90ee90;
+        }
+        
+        .header-right {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .phone {
+            font-size: 18px;
+        }
+        
+        .login-btn {
+            background: #90ee90;
+            color: #2d5a3d;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .login-btn:hover {
+            background: #7dd87d;
+            transform: translateY(-2px);
+        }
+        
+        /* Фильтры */
+        .filters {
+            background: white;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: end;
+        }
+        
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .filter-group select,
+        .filter-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #3d7a4d;
+        }
+        
+        .search-btn {
+            background: #3d7a4d;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .search-btn:hover {
+            background: #2d5a3d;
+            transform: translateY(-2px);
+        }
+        
+        /* Список объектов */
+        .objects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .object-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .object-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+        
+        .object-image {
+            width: 100%;
+            height: 220px;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 14px;
+            position: relative;
+        }
+        
+        .object-image::before {
+            content: "📷";
+            font-size: 48px;
+            opacity: 0.3;
+        }
+        
+        .object-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #3d7a4d;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .object-content {
+            padding: 20px;
+        }
+        
+        .object-price {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2d5a3d;
+            margin-bottom: 10px;
+        }
+        
+        .object-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .object-location {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .object-details {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .object-detail {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .object-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .object-agent {
+            font-size: 13px;
+            color: #999;
+        }
+        
+        .object-btn {
+            background: #3d7a4d;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.3s;
+        }
+        
+        .object-btn:hover {
+            background: #2d5a3d;
+        }
+        
+        /* Кнопка звонка */
+        .call-btn {
+            background: #ff6b6b;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+        
+        .call-btn:hover {
+            background: #ee5a5a;
+        }
+        
+        /* Футер */
+        .footer {
+            background: #2d5a3d;
+            color: white;
+            padding: 40px 0;
+            margin-top: 50px;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        
+        .footer-section h3 {
+            margin-bottom: 15px;
+            color: #90ee90;
+        }
+        
+        .footer-section p,
+        .footer-section a {
+            color: #ccc;
+            text-decoration: none;
+            line-height: 1.8;
+        }
+        
+        .footer-section a:hover {
+            color: #90ee90;
+        }
+        
+        /* Модальное окно входа */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #2d5a3d;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #3d7a4d;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            background: #3d7a4d;
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .submit-btn:hover {
+            background: #2d5a3d;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 30px;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        /* Модальное окно звонка */
+        .call-modal-text {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #666;
+        }
+        
+        .call-modal-phone {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2d5a3d;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Шапка -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">A <span>Realty</span> Group</div>
+                <div class="header-right">
+                    <div class="phone">+7 (777) 123-45-67</div>
+                    <button class="login-btn" onclick="openModal('loginModal')">Войти для агентов</button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Фильтры -->
+    <section class="filters">
+        <div class="container">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Район</label>
+                    <select id="filterDistrict">
+                        <option value="all">Все районы</option>
+                        <option value="alatau" selected>Алатауский</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Микрорайон</label>
+                    <select id="filterMicro">
+                        <option value="all">Все микрорайоны</option>
+                        <option value="Ғажайып">Ғажайып</option>
+                        <option value="Акбулак">Акбулак</option>
+                        <option value="Нуркент">Нуркент</option>
+                        <option value="Саялы">Саялы</option>
+                        <option value="Басаркобыз">Басаркобыз</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Комнаты</label>
+                    <select id="filterRooms">
+                        <option value="all">Любое</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Цена от</label>
+                    <input type="number" id="priceFrom" placeholder="0">
+                </div>
+                <div class="filter-group">
+                    <label>Цена до</label>
+                    <input type="number" id="priceTo" placeholder="100000000">
+                </div>
+                <button class="search-btn" onclick="filterObjects()">Найти</button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Объекты -->
+    <main class="container">
+        <div id="objectsContainer" class="objects-grid">
+            <!-- Объекты будут загружены через JavaScript -->
+        </div>
+    </main>
+    
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>A Realty Group</h3>
+                    <p>Профессиональная недвижимость в Алматы</p>
+                    <p>Более 91 объекта в Алатауском районе</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Контакты</h3>
+                    <p>Тел: +7 (777) 123-45-67</p>
+                    <p>Email: info@arealty.kz</p>
+                    <p>Алматы, Алатауский район</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Агентам</h3>
+                    <p><a href="#" onclick="openModal('loginModal')">Вход в личный кабинет</a></p>
+                    <p><a href="#">Стать партнёром</a></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Модальное окно входа -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('loginModal')">&times;</span>
+            <h2 class="modal-title">Вход для агентов</h2>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Логин (ID агента)</label>
+                    <input type="text" id="loginInput" placeholder="Например: 5969819" required>
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" id="passwordInput" placeholder="Введите пароль" required>
+                </div>
+                <button type="submit" class="submit-btn">Войти</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Модальное окно звонка -->
+    <div class="modal" id="callModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('callModal')">&times;</span>
+            <h2 class="modal-title">Звонок продавцу</h2>
+            <p class="call-modal-text">Мы соединим вас с продавцом через защищённую линию</p>
+            <div class="call-modal-phone" id="callPhone">+7 (700) 000-00-00</div>
+            <p class="call-modal-text" style="font-size: 12px; color: #999;">
+                Ваш номер не будет виден продавцу.<br>
+                Разговор будет записан для контроля качества.
+            </p>
+            <button class="call-btn" onclick="makeCall()">Позвонить сейчас</button>
+        </div>
+    </div>
+
+    <script>
+        // Данные объектов (в реальности загружаются с сервера)
+        const objects = [
+            {id: 'AL01', micro: 'Ғажайып', price: 25500000, rooms: 1, area: 34.34, floor: 6, agent: 'Жанат Тампиева', status: 'Свободен'},
+            {id: 'AL03', micro: 'Саялы', price: 24000000, rooms: 1, area: 30, floor: 5, agent: 'Жанат Тампиева', status: 'Свободен'},
+            {id: 'AL04', micro: 'Акбулак', price: 28500000, rooms: 1, area: 45, floor: 1, agent: 'Жанат Тампиева', status: 'Свободен'},
+            {id: 'AL05', micro: 'Акбулак', price: 20000000, rooms: 1, area: 35, floor: 9, agent: 'Жанат Тампиева', status: 'Свободен'},
+            {id: 'AL06', micro: 'Нуркент', price: 24950000, rooms: 1, area: 45.5, floor: 11, agent: 'Жанат Тампиева', status: 'Свободен'},
+            {id: 'AL07', micro: 'Мкр-20', price: 24000000, rooms: 1, area: 40, floor: 3, agent: 'Жанат Тампиева', status: 'Свободен'},
+            {id: 'AL08', micro: 'Ғажайып', price: 37000000, rooms: 1, area: 44, floor: 10, agent: 'Жанат Тампиева', status: 'Свободен'},
+            {id: 'AL09', micro: 'Ғажайып', price: 36000000, rooms: 1, area: 36, floor: 6, agent: 'Жанат Тампиева', status: 'Свободен'},
+            {id: 'AL10', micro: 'Акбулак', price: 22500000, rooms: 1, area: 45.85, floor: 6, agent: 'Жанат Тампиева', status: 'Свободен'},
+            {id: 'AL11', micro: 'Нуркент', price: 24500000, rooms: 1, area: 47, floor: 9, agent: 'Жанат Тампиева', status: 'Свободен'},
+            {id: 'AL12', micro: '20-й Микрорайон', price: 31500000, rooms: 1, area: 43, floor: 4, agent: 'Жанат Тампиева', status: 'Свободен'},
+            {id: 'AL24', micro: 'Акбулак', price: 23500000, rooms: 2, area: 46.3, floor: 12, agent: 'Жанат Тампиева', status: 'Свободен'},
+            {id: 'AL27', micro: 'Басаркобыз', price: 24000000, rooms: 2, area: 50, floor: 5, agent: 'Жанат Тампиева', status: 'Свободен'},
+            {id: 'AL47', micro: 'Ғажайып', price: 50000000, rooms: 2, area: 51.3, floor: 12, agent: 'Жанат Тампиева', status: 'Свободен'},
+            {id: 'AL126', micro: 'Зердели', price: 31000000, rooms: 3, area: 75, floor: 9, agent: 'Нурлан Кадиров', status: 'Свободен'},
+            {id: 'AL125', micro: 'Дарабоз', price: 41000000, rooms: 3, area: 71, floor: 12, agent: 'Нурлан Кадиров', status: 'Свободен'},
+            {id: 'AL114', micro: 'Ғажайып', price: 54000000, rooms: 3, area: 66, floor: 12, agent: 'Нурлан Кадиров', status: 'Свободен'}
+        ];
+
+        // Текущий пользователь
+        let currentUser = null;
+
+        // Загрузка объектов при старте
+        window.onload = function() {
+            renderObjects(objects);
+        };
+
+        // Отрисовка объектов
+        function renderObjects(data) {
+            const container = document.getElementById('objectsContainer');
+            container.innerHTML = '';
+            
+            data.forEach(obj => {
+                const card = document.createElement('div');
+                card.className = 'object-card';
+                card.innerHTML = `
+                    <div class="object-image">
+                        <span class="object-badge">${obj.rooms}-комн.</span>
+                    </div>
+                    <div class="object-content">
+                        <div class="object-price">${obj.price.toLocaleString()} ₸</div>
+                        <div class="object-title">${obj.id} | ${obj.micro}</div>
+                        <div class="object-location">Алатауский район, Алматы</div>
+                        <div class="object-details">
+                            <div class="object-detail">🏠 ${obj.rooms} комн.</div>
+                            <div class="object-detail">📐 ${obj.area} м²</div>
+                            <div class="object-detail">🏢 ${obj.floor} этаж</div>
+                        </div>
+                        <div class="object-footer">
+                            <div class="object-agent">${obj.agent}</div>
+                            <button class="object-btn" onclick="showDetails('${obj.id}')">Подробнее</button>
+                        </div>
+                        ${currentUser ? `<button class="call-btn" onclick="openCallModal('${obj.id}')">📞 Позвонить продавцу</button>` : ''}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Фильтрация объектов
+        function filterObjects() {
+            const micro = document.getElementById('filterMicro').value;
+            const rooms = document.getElementById('filterRooms').value;
+            const priceFrom = document.getElementById('priceFrom').value;
+            const priceTo = document.getElementById('priceTo').value;
+            
+            let filtered = objects;
+            
+            if (micro !== 'all') {
+                filtered = filtered.filter(o => o.micro === micro);
+            }
+            if (rooms !== 'all') {
+                filtered = filtered.filter(o => o.rooms == rooms);
+            }
+            if (priceFrom) {
+                filtered = filtered.filter(o => o.price >= priceFrom);
+            }
+            if (priceTo) {
+                filtered = filtered.filter(o => o.price <= priceTo);
+            }
+            
+            renderObjects(filtered);
+        }
+
+        // Модальные окна
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Вход агента
+        function handleLogin(e) {
+            e.preventDefault();
+            const login = document.getElementById('loginInput').value;
+            const password = document.getElementById('passwordInput').value;
+            
+            // Проверка (в реальности через API)
+            if (login === '5969819' || login === '127611' || login === '18616153') {
+                currentUser = login;
+                closeModal('loginModal');
+                document.querySelector('.login-btn').textContent = 'Кабинет агента';
+                renderObjects(objects);
+                alert('Добро пожаловать, агент!');
+            } else {
+                alert('Неверный логин или пароль');
+            }
+        }
+
+        // Звонок продавцу
+        let currentCallObject = null;
+        
+        function openCallModal(objectId) {
+            currentCallObject = objectId;
+            openModal('callModal');
+        }
+
+        function makeCall() {
+            // Здесь будет интеграция с Mango API
+            alert('Инициализация звонка через Mango...\nОбъект: ' + currentCallObject);
+            closeModal('callModal');
+        }
+
+        function showDetails(objectId) {
+            alert('Детали объекта ' + objectId + '\n(Здесь будет карточка с фото и описанием)');
+        }
+
+        // Закрытие по клику вне модалки
+        window.onclick = function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>
