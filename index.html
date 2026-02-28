@@ -251,7 +251,7 @@
 
         async function loadBitrixDeals() {
             // Получаем сделки из воронки
-            const response = await fetch(`${BITRIX_WEBHOOK}crm.deal.list?filter[STAGE_ID]=NEW&select[]=*&select[]=UF_*`);
+            const response = await fetch(`${BITRIX_WEBHOOK}crm.deal.list?select[]=*&select[]=UF_*`);
             const data = await response.json();
             const deals = data.result || [];
             
